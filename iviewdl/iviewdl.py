@@ -110,11 +110,11 @@ def main():
                     print("{0}: {seriesTitle}".format(n, **data))
 
             if sys.stdout.isatty():
-                result = results[prompt("enter your choice: ")]
+                result = results["_embedded"]["videoEpisodes"][prompt("enter your choice: ")]
             else:
                 return 2
         else:
-            result = results[args.selection]
+            result = results["_embedded"]["videoEpisodes"][args.selection]
     else:
         try:
             result = results["_embedded"]["videoEpisodes"][0]
