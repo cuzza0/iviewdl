@@ -55,15 +55,21 @@ def get_stream_urls(data):
         for p in data["_embedded"]["playlist"]:
             if p["type"] == "program":
                 streamUrl = p["streams"]["hls"]["sd"]
-                out["program"] = streamUrl[0:streamUrl.index("?")] + generate_secret(data["houseNumber"])
+                if "?" in streamUrl:
+                    streamUrl = streamUrl[0:streamUrl.index("?")]
+                out["program"] = streamUrl + generate_secret(data["houseNumber"])
                 if "captions" in p:
                     out["subs"] = vtt_to_srt(p["captions"]["src-vtt"])
             elif p["type"] == "rating":
                 streamUrl = p["streams"]["hls"]["sd"]
-                out["rating"] = streamUrl[0:streamUrl.index("?")] + generate_secret(data["houseNumber"])
+                if "?" in streamUrl:
+                    streamUrl = streamUrl[0:streamUrl.index("?")]
+                out["rating"] = streamUrl + generate_secret(data["houseNumber"])
             elif p["type"] == "preroll":
                 streamUrl = p["streams"]["hls"]["sd"]
-                out["rating"] = streamUrl[0:streamUrl.index("?")] + generate_secret(data["houseNumber"])
+                if "?" in streamUrl:
+                    streamUrl = streamUrl[0:streamUrl.index("?")]
+                out["rating"] = streamUrl + generate_secret(data["houseNumber"])
         return out
     else:
         raise Exception("No playlist data")
