@@ -131,6 +131,10 @@ def main():
     data = get_stream_urls(requests.get("https://api.iview.abc.net.au/v2/" + result["_links"]["self"]["href"]).json())
     process = subprocess.Popen(get_download_cmd(data, filename=args.filename), stdout=subprocess.PIPE)
     process.wait()
+    try:
+        print("Downloaded {seriesTitle} {title}".format(**result), file=sys.stdout)
+    except KeyError:
+        print("Downloaded {seriesTitle}".format(**result), file=sys.stdout)    
     return process.returncode
 
 
