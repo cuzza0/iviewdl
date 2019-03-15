@@ -7,7 +7,7 @@ setup(
     entry_points = {
         "console_scripts": ['iviewdl = iviewdl.iviewdl:main']
         },
-    version = "1.1.2",
+    version = "1.1.3",
     description = "A Python program to download videos from ABC iView",
     author = "Steven Smith",
     author_email = "stevensmith.ome@gmail.com",
