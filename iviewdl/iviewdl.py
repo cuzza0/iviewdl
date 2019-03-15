@@ -105,7 +105,7 @@ def main():
         if args.selection is None:
             for n, data in enumerate(results["_embedded"]["videoEpisodes"]):
                 try:
-                    print("{0}: {seriesTitle} {title}".format(n, **data))
+                    print("{0}: {seriesTitle} {title} {expireDate}".format(n, **data))
                 except KeyError:
                     print("{0}: {seriesTitle}".format(n, **data))
 
