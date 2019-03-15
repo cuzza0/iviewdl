@@ -19,8 +19,7 @@ if not find_executable("ffmpeg"):
 
 
 def search(term):
-    return requests.get("http://iview.abc.net.au/api/search/",
-                        params={"fields": "href,seriesTitle,title", "keyword": term}).json()
+    return requests.get("https://api.iview.abc.net.au/v2/series/" + term).json()
 
 
 def vtt_to_srt(url):
@@ -45,7 +44,7 @@ def generate_secret(movieid):
 
 
 def get_stream_urls(data):
-    if data["playlist"]:
+    if data["_embedded"]["playlist"]:
         if "title" not in data:  # title must exist for the file name
             data["title"] = ""
         else:
@@ -53,15 +52,15 @@ def get_stream_urls(data):
 
         out = {"filename": "".join(
             c if c not in "\/:*?<>|" else "_" for c in "{}{}.mp4".format(data["seriesTitle"], data["title"]))}
-        for p in data["playlist"]:
+        for p in data["_embedded"]["playlist"]:
             if p["type"] == "program":
-                out["program"] = p["hls-plus"] + generate_secret(data["episodeHouseNumber"])
+                out["program"] = p["streams"]["hls"]["sd"] + generate_secret(data["houseNumber"])
                 if "captions" in p:
                     out["subs"] = vtt_to_srt(p["captions"]["src-vtt"])
             elif p["type"] == "rating":
-                out["rating"] = p["hls-plus"] + generate_secret(data["episodeHouseNumber"])
+                out["rating"] = p["streams"]["hls"]["sd"] + generate_secret(data["houseNumber"])
             elif p["type"] == "preroll":
-                out["rating"] = p["hls-plus"] + generate_secret(data["episodeHouseNumber"])
+                out["rating"] = p["streams"]["hls"]["sd"] + generate_secret(data["houseNumber"])
         return out
     else:
         raise Exception("No playlist data")
@@ -104,7 +103,7 @@ def main():
     results = search(args.search)
     if len(results) > 1:
         if args.selection is None:
-            for n, data in enumerate(results):
+            for n, data in enumerate(results["_embedded"]["videoEpisodes"]):
                 try:
                     print("{0}: {seriesTitle} {title}".format(n, **data))
                 except KeyError:
@@ -118,7 +117,7 @@ def main():
             result = results[args.selection]
     else:
         try:
-            result = results[0]
+            result = results["_embedded"]["videoEpisodes"][0]
         except IndexError:
             print("No matches found")
             quit()
@@ -126,7 +125,7 @@ def main():
         print("Downloading {seriesTitle} {title}".format(**result), file=sys.stdout)
     except KeyError:
         print("Downloading {seriesTitle}".format(**result), file=sys.stdout)
-    data = get_stream_urls(requests.get("http://iview.abc.net.au/api/" + result["href"]).json())
+    data = get_stream_urls(requests.get("https://api.iview.abc.net.au/v2/" + result["_links"]["self"]["href"]).json())
     process = subprocess.Popen(get_download_cmd(data, filename=args.filename), stdout=subprocess.PIPE)
     process.wait()
     return process.returncode
